@@ -3,12 +3,6 @@ variable "name" {
   description = "The name of the Glue job"
 }
 
-variable "active" {
-  type        = bool
-  default     = true
-  description = "Whether the glue job should be active"
-}
-
 variable "command_name" {
   type        = string
   default     = "glueetl"
@@ -63,18 +57,30 @@ variable "role_arn" {
   description = "An optional Glue execution role"
 }
 
-variable "schedule" {
-  type        = string
-  default     = null
-  description = "A cron expression used to specify the schedule for the glue job"
-}
-
 variable "script_location" {
   type        = string
   description = "Specifies the S3 path to the script that is executed by this job"
 }
 
-variable "type" {
+variable "trigger_enabled" {
+  type        = bool
+  default     = true
+  description = "Whether the glue trigger should be active"
+}
+
+variable "trigger_predicate" {
+  type        = list(any)
+  default     = []
+  description = "A predicate to specify when the new trigger should fire. Required when trigger type is CONDITIONAL."
+}
+
+variable "trigger_schedule" {
+  type        = string
+  default     = null
+  description = "A cron expression used to specify the schedule for the glue job"
+}
+
+variable "trigger_type" {
   type        = string
   default     = "SCHEDULED"
   description = "The type ('CONDITIONAL' or 'ON_DEMAND' or 'SCHEDULED') of the trigger"

@@ -20,8 +20,8 @@ resource "aws_iam_role" "default" {
 }
 
 resource "aws_iam_role_policy" "default" {
-  count  = var.role_arn == null ? 1 : 0
-  name   = "GlueRole-${var.name}"
+  count  = var.policy != null ? (var.role_arn != null ? 1 : 0) : 0
+  name   = "GlueRolePolicy-${var.name}"
   role   = aws_iam_role.default[0].id
   policy = var.policy
 }
@@ -51,12 +51,27 @@ resource "aws_glue_job" "default" {
 
 resource "aws_glue_trigger" "default" {
   name     = var.name
-  enabled  = var.active
-  schedule = var.schedule
-  type     = var.type
+  enabled  = var.trigger_enabled
+  schedule = var.trigger_schedule
+  type     = var.trigger_type
   tags     = var.tags
 
   actions {
     job_name = aws_glue_job.default.name
+  }
+
+  dynamic "predicate" {
+    iterator = predicate
+    for_each = var.trigger_predicate
+    content {
+      logical = lookup(predicate.value, "logical", "AND")
+      conditions {
+        job_name         = lookup(predicate.value, "job_name", null)
+        state            = lookup(predicate.value, "state", null)
+        crawler_name     = lookup(predicate.value, "crawler_name", null)
+        crawl_state      = lookup(predicate.value, "crawl_state", null)
+        logical_operator = lookup(predicate.value, "logical_operator", null)
+      }
+    }
   }
 }
